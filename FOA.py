@@ -6,7 +6,7 @@ import inspect
 import matplotlib.pyplot as plt
 import numpy as np
 
-DEBUG = False
+DEBUG = True
 
 def log(s):
     if DEBUG:
@@ -18,6 +18,12 @@ def function1(x,y):
 def function2(x,y):
     return x**2 + y**2
 
+#Funciones de paper
+def f1(x,y):
+    return x * math.sin(4*x) + 1.1*y*math.sin(2*y)
+
+
+ 
 class FOA:
     def __init__(self,function,lowlim,highlim,lifeTime,LSC,GSC,transferRate,areaLimit,forestSize,minimize,generations):
         self.lifeTime     = lifeTime
@@ -32,7 +38,7 @@ class FOA:
         self.lowlim       = lowlim
         self.highlim      = highlim
 
-        self.diffX        = int(self.highlim*0.2)  #Valor a añadir a la variable elegida (Local seeding)   
+        self.diffX        = (self.highlim*0.15)  #Valor a añadir a la variable elegida (Local seeding)   
 
         self.minimize     = minimize
         self.best         = np.array(["Aún","No existe"])
@@ -65,7 +71,7 @@ class FOA:
             self.printTable("Población (Global Seeding)",self.forest,self.forestFitness)
             #Update best so far
             self.updateBest()
-            self.plotTrees([self.best],'g^',10)
+            self.plotTrees([self.best],'g^',15)
             plt.clf()
 
         print("El mejor es {} ({})".format( self.best[1:], self.bestFit ) )
@@ -220,7 +226,7 @@ class FOA:
         plt.ylim(self.lowlim,self.highlim)
         plt.plot(*self.makeAxis(trees),options,markersize=markersiz)
         plt.draw()
-        plt.pause(0.001)
+        plt.pause(0.005)
 
     #Dependiendo de la cantidad de soluciones,
     #haremos cabeceras de la tabla.
@@ -246,7 +252,6 @@ class FOA:
                 vals = [i+1]+pops(pop[i][1:]) + [int(pop[i][0])]
                 table.add_row( vals )     
        
-
         log(table.get_string(header=True, border=True))
 
 
@@ -254,7 +259,7 @@ if __name__ == '__main__':
     print("\nCOMIENZO PROCESO: ", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     comienzo = time.time()
     foa   = FOA(function1,lowlim = -10,highlim = 10,\
-                lifeTime = 4, LSC = 3, GSC = 3, transferRate = 10, areaLimit = 30, forestSize = 30,\
+                lifeTime = 4, LSC = 2, GSC = 2, transferRate = 10, areaLimit = 30, forestSize = 30,\
                 minimize = True, generations = 20)
     final    = time.time()
     print("\nFIN DEL PROCESO", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
