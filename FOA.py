@@ -139,13 +139,13 @@ class FOA:
         
         newGenerated = []
         for i in chosenCandidates:
+            candidate    = np.copy(i)
+            candidate[0] = 0
             for j in range(self.GSC):
-                candidate    = np.copy(i)
-                candidate[0] = 0
                 randVar      = np.random.randint(1,self.funcArgs+1)         #Variable a editar
                 randVal      = np.random.uniform(-self.lowlim,self.highlim) #Valor con el cual reemplazar
                 candidate[randVar] = randVal
-                newGenerated.append(candidate)
+            newGenerated.append(candidate)
         #Añadimos los nuevos generados al bosque
         newGenerated        = np.array(newGenerated)
         newGeneratedFitness = self.fitness(newGenerated)
@@ -259,7 +259,7 @@ if __name__ == '__main__':
     print("\nCOMIENZO PROCESO: ", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     comienzo = time.time()
     foa   = FOA(function1,lowlim = -10,highlim = 10,\
-                lifeTime = 4, LSC = 2, GSC = 2, transferRate = 10, areaLimit = 30, forestSize = 30,\
+                lifeTime = 4, LSC = 2, GSC = 1, transferRate = 10, areaLimit = 30, forestSize = 30,\
                 minimize = True, generations = 20)
     final    = time.time()
     print("\nFIN DEL PROCESO", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
