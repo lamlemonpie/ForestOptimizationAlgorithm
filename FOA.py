@@ -6,7 +6,7 @@ import inspect
 import matplotlib.pyplot as plt
 import numpy as np
 
-DEBUG = True
+DEBUG = False
 
 def log(s):
     if DEBUG:
@@ -46,12 +46,9 @@ class FOA:
         self.forestFitness = self.fitness(self.forest)
         self.printTable("Población Inicial",self.forest,self.forestFitness)
 
-        #axes = plt.gca()
-        #axes.set_xlim([self.lowlim,self.highlim])
-        #axes.set_ylim([self.lowlim,self.highlim])
         plt.xlim(self.lowlim,self.highlim)
         plt.ylim(self.lowlim,self.highlim)
-        #plt.axis([self.lowlim,self.highlim,self.lowlim,self.highlim])
+        
         for i in range(self.generations):
             log("\n"+"+"*70); log("GENERACIÓN {} DE {}:".format(i+1,self.generations))
             #Local seeding
@@ -71,7 +68,7 @@ class FOA:
             self.plotTrees([self.best],'g^',10)
             plt.clf()
 
-        log("El mejor es {} ({})".format( self.best[1:], self.bestFit ) )
+        print("El mejor es {} ({})".format( self.best[1:], self.bestFit ) )
 
     def generateInitialForest(self):
         self.forest    = np.array( [ [0]+[ np.random.uniform(self.lowlim,self.highlim)\
@@ -100,7 +97,7 @@ class FOA:
         for i in self.forest:
             i[0] += 1
         #Añadimos los nuevos generados al bosque
-        self.plotTrees(newTrees,'bo',6)               
+        self.plotTrees(newTrees,'bo',6)
         self.forest = np.concatenate( ( self.forest, np.array(newTrees) ) )
         self.forestFitness = np.concatenate( (self.forestFitness, self.fitness(newTrees)  ) )
 
@@ -119,16 +116,21 @@ class FOA:
         #Ordenamos el bosque de acuerdo al fitness
         sorted             = self.forestFitness.argsort()
         #Eliminamos los arboles extra de acuerdo a areaLimit y los añadimos a candidatos
-        kept, deleted      = self.keptAndDeleted(sorted)
+        kept, deleted      = self.keptAndDeleted(sorted,self.areaLimit)
         self.candidates    = np.concatenate( ( self.candidates, self.forest[deleted] ) )
         self.forest        = self.forest[kept]
         self.forestFitness = self.forestFitness[kept]
 
     def globalSeeding(self):
         #Calculamos el transferRate% del total de candidatos
+        #Seleccionamos el transferRate% de los mejores candidatos.
         chosenAmmount = math.ceil((self.transferRate/100)*len( self.candidates ))
         log("\nSeleccionamos {} elementos ({}% del total de candidatos)".format(chosenAmmount,self.transferRate))
-        chosenCandidates = self.candidates[:chosenAmmount]
+        self.candidatesFitness = self.fitness(self.candidates)
+        sortedCandidates = self.forestFitness.argsort()
+        kept, deleted      = self.keptAndDeleted(sortedCandidates,chosenAmmount)
+        chosenCandidates = self.candidates[kept]
+        
         newGenerated = []
         for i in chosenCandidates:
             for j in range(self.GSC):
@@ -163,15 +165,24 @@ class FOA:
             
         else:
             log("El mejor {} ({}) se mantiene".format(self.best[1:],self.bestFit))
+            same = True
+            for i in range(1, len(self.forest[localBest]) ):
+                if( self.best[i] != self.forest[localBest][i] ):
+                    same = False
+            if(same):
+                log("El mejor se encuentra en el bosque, reiniciando edad.")
+                self.forest[localBest][0] = 0
+                self.best = self.forest[localBest]
+            
 
         
     #------------------------------FUNCIONES DE SOPORTE----------------------------------------#
 
-    def keptAndDeleted(self,sorted):
+    def keptAndDeleted(self,sorted,limit):
         if(self.minimize):
-            return sorted[:self.areaLimit],sorted[self.areaLimit:]
+            return sorted[:limit],sorted[limit:]
         else:
-            return sorted[-self.areaLimit:],sorted[:-self.areaLimit]
+            return sorted[-limit:],sorted[:-limit]
 
     def localBest(self,population):
         if self.minimize:
@@ -209,7 +220,7 @@ class FOA:
         plt.ylim(self.lowlim,self.highlim)
         plt.plot(*self.makeAxis(trees),options,markersize=markersiz)
         plt.draw()
-        plt.pause(0.005)
+        plt.pause(0.001)
 
     #Dependiendo de la cantidad de soluciones,
     #haremos cabeceras de la tabla.
@@ -243,8 +254,8 @@ if __name__ == '__main__':
     print("\nCOMIENZO PROCESO: ", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     comienzo = time.time()
     foa   = FOA(function1,lowlim = -10,highlim = 10,\
-                lifeTime = 6, LSC = 2, GSC = 2, transferRate = 10, areaLimit = 30, forestSize = 30,\
-                minimize = True, generations = 50)
+                lifeTime = 4, LSC = 3, GSC = 3, transferRate = 10, areaLimit = 30, forestSize = 30,\
+                minimize = True, generations = 20)
     final    = time.time()
     print("\nFIN DEL PROCESO", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     print("Tiempo:",final-comienzo)
