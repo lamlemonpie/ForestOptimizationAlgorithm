@@ -5,6 +5,7 @@ import datetime
 import inspect
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 DEBUG = True
 
@@ -129,14 +130,19 @@ class FOA:
 
     def globalSeeding(self):
         #Calculamos el transferRate% del total de candidatos
-        #Seleccionamos el transferRate% de los mejores candidatos.
         chosenAmmount = math.ceil((self.transferRate/100)*len( self.candidates ))
         log("\nSeleccionamos {} elementos ({}% del total de candidatos)".format(chosenAmmount,self.transferRate))
-        self.candidatesFitness = self.fitness(self.candidates)
-        sortedCandidates = self.forestFitness.argsort()
-        kept, deleted      = self.keptAndDeleted(sortedCandidates,chosenAmmount)
-        chosenCandidates = self.candidates[kept]
+        #Dos opciones (La del paper es la Op2)
+        #Seleccionamos el transferRate% de los mejores candidatos. (Op1) 
+        # self.candidatesFitness = self.fitness(self.candidates)
+        # sortedCandidates = self.forestFitness.argsort()
+        # kept, deleted      = self.keptAndDeleted(sortedCandidates,chosenAmmount)
+        # chosenCandidates = self.candidates[kept]
         
+        #Seleccionamos aleatoriamente transferRate% del total de candidatos (Op2)
+        np.random.shuffle(self.candidates)
+        chosenCandidates = self.candidates[:chosenAmmount]
+
         newGenerated = []
         for i in chosenCandidates:
             candidate    = np.copy(i)
