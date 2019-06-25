@@ -59,7 +59,7 @@ class FOA:
         for i in range(self.generations):
             log("\n"+"+"*70); log("GENERACIÓN {} DE {}:".format(i+1,self.generations))
             #Local seeding
-            self.plotTrees(self.forest,'ro',6)
+            self.plotTrees(self.forest,'go',7) #Bosque verde
             self.localSeeding()
             self.printTable("Población (Local Seeding)",self.forest,self.forestFitness)
         
@@ -72,10 +72,10 @@ class FOA:
             self.printTable("Población (Global Seeding)",self.forest,self.forestFitness)
             #Update best so far
             self.updateBest()
-            self.plotTrees([self.best],'g^',15)
+            self.plotTrees([self.best],'r^',15) #Mejor rojo
             plt.clf()
 
-        print("El mejor es {} ({})".format( self.best[1:], self.bestFit ) )
+        print("\nEl mejor es {} ({})".format( self.best[1:], self.bestFit ) )
 
     def generateInitialForest(self):
         self.forest    = np.array( [ [0]+[ np.random.uniform(self.lowlim,self.highlim)\
@@ -104,7 +104,7 @@ class FOA:
         for i in self.forest:
             i[0] += 1
         #Añadimos los nuevos generados al bosque
-        self.plotTrees(newTrees,'bo',6)
+        self.plotTrees(newTrees,'yo',4) #LocalSeed amarillo
         self.forest = np.concatenate( ( self.forest, np.array(newTrees) ) )
         self.forestFitness = np.concatenate( (self.forestFitness, self.fitness(newTrees)  ) )
 
@@ -143,6 +143,8 @@ class FOA:
         np.random.shuffle(self.candidates)
         chosenCandidates = self.candidates[:chosenAmmount]
 
+        self.printTable("Candidatos elegidos",chosenCandidates)
+        log("Modificación de candidatos elegidos")
         newGenerated = []
         for i in chosenCandidates:
             candidate    = np.copy(i)
@@ -150,11 +152,13 @@ class FOA:
             for j in range(self.GSC):
                 randVar      = np.random.randint(1,self.funcArgs+1)         #Variable a editar
                 randVal      = np.random.uniform(-self.lowlim,self.highlim) #Valor con el cual reemplazar
+                log("{} => {} => {}".format(candidate[1:],candidate[randVar],randVal))
                 candidate[randVar] = randVal
             newGenerated.append(candidate)
         #Añadimos los nuevos generados al bosque
         newGenerated        = np.array(newGenerated)
         newGeneratedFitness = self.fitness(newGenerated)
+        self.plotTrees(newGenerated,'co',4) #GlobalSeed cyan
         self.forest         = np.concatenate( ( self.forest, newGenerated ) )
         self.forestFitness  = np.concatenate( ( self.forestFitness, newGeneratedFitness ) )
         #Vaciamos los candidatos
@@ -171,6 +175,7 @@ class FOA:
                     self.best[1:],self.bestFit,self.forest[localBest][1:],self.forestFitness[localBest] ))
             #Reiniciamos la edad del mejor.
             self.forest[localBest][0] = 0
+            log("Reiniciando la edad del mejor.")
             #Actualizamos el mejor
             self.best                 = self.forest[localBest]
             self.bestFit              = self.forestFitness[localBest]
@@ -232,7 +237,7 @@ class FOA:
         plt.ylim(self.lowlim,self.highlim)
         plt.plot(*self.makeAxis(trees),options,markersize=markersiz)
         plt.draw()
-        plt.pause(0.005)
+        plt.pause(0.0005)
 
     #Dependiendo de la cantidad de soluciones,
     #haremos cabeceras de la tabla.
@@ -264,7 +269,7 @@ class FOA:
 if __name__ == '__main__':
     print("\nCOMIENZO PROCESO: ", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     comienzo = time.time()
-    foa   = FOA(function1,lowlim = -10,highlim = 10,\
+    foa   = FOA(f1,lowlim = 0,highlim = 10,\
                 lifeTime = 4, LSC = 2, GSC = 1, transferRate = 10, areaLimit = 30, forestSize = 30,\
                 minimize = True, generations = 20)
     final    = time.time()
