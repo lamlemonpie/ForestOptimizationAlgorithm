@@ -97,7 +97,7 @@ class FOA:
                     log("{} => {} + {} = {}".format(i[1:],i[randVar],randVal,i[randVar]+randVal))
                     newTree[randVar] += randVal
                     newTree[randVar] = self.checkBoundaries(newTree[randVar])
-                    newTrees.append(newTree)    
+                    newTrees.append(newTree)
                 
         log("Incrementando edad a todos los arboles antiguos")
         #Aumentamos la edad de los arboles
@@ -132,14 +132,8 @@ class FOA:
         #Calculamos el transferRate% del total de candidatos
         chosenAmmount = math.ceil((self.transferRate/100)*len( self.candidates ))
         log("\nSeleccionamos {} elementos ({}% del total de candidatos)".format(chosenAmmount,self.transferRate))
-        #Dos opciones (La del paper es la Op2)
-        #Seleccionamos el transferRate% de los mejores candidatos. (Op1) 
-        # self.candidatesFitness = self.fitness(self.candidates)
-        # sortedCandidates = self.forestFitness.argsort()
-        # kept, deleted      = self.keptAndDeleted(sortedCandidates,chosenAmmount)
-        # chosenCandidates = self.candidates[kept]
         
-        #Seleccionamos aleatoriamente transferRate% del total de candidatos (Op2)
+        #Seleccionamos aleatoriamente transferRate% del total de candidatos
         np.random.shuffle(self.candidates)
         chosenCandidates = self.candidates[:chosenAmmount]
 
@@ -237,7 +231,7 @@ class FOA:
         plt.ylim(self.lowlim,self.highlim)
         plt.plot(*self.makeAxis(trees),options,markersize=markersiz)
         plt.draw()
-        plt.pause(0.0005)
+        plt.pause(0.01)
 
     #Dependiendo de la cantidad de soluciones,
     #haremos cabeceras de la tabla.
@@ -269,7 +263,7 @@ class FOA:
 if __name__ == '__main__':
     print("\nCOMIENZO PROCESO: ", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"))
     comienzo = time.time()
-    foa   = FOA(f1,lowlim = 0,highlim = 10,\
+    foa   = FOA(function2,lowlim = -5,highlim = 5,\
                 lifeTime = 4, LSC = 2, GSC = 1, transferRate = 10, areaLimit = 30, forestSize = 30,\
                 minimize = True, generations = 20)
     final    = time.time()
